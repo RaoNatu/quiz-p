@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GATE 2027 CS · Study Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e1124;--p:#171b36;--p2:#1f2447;--tx:#e9ebff;--mu:#9aa0c9;--ac:#ffd166;--ok:#4ade80;--bd:#2b3160;color-scheme:dark}
+@media(prefers-color-scheme:light){:root{--bg:#f3f4fb;--p:#fff;--p2:#eceefa;--tx:#1a1d3a;--mu:#5d638c;--ac:#c47f00;--ok:#15803d;--bd:#d7daf0;color-scheme:light}}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--tx);font:15px/1.55 Inter,system-ui,sans-serif;padding-bottom:84px}
+h1,h2,h3,.sora{font-family:Sora,Inter,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:10px 16px}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;max-width:1100px;margin:auto}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:var(--p);border:1px solid var(--bd);border-radius:99px;padding:3px 12px;font-size:13px}
+nav{display:flex;gap:4px;max-width:1100px;margin:8px auto 0;overflow-x:auto}
+nav button{background:none;border:0;color:var(--mu);padding:8px 14px;border-radius:8px;font:500 14px Inter;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--p2);color:var(--tx)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+main{max-width:1100px;margin:auto;padding:18px 16px}
+.card{background:var(--p);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.tag{display:inline-block;border-radius:6px;padding:1px 9px;font-size:12px;font-weight:600;color:#10122a}
+.mu{color:var(--mu)}.row{display:flex;gap:10px;align-items:flex-start;padding:8px 6px;border-radius:8px;cursor:pointer}
+.row:hover{background:var(--p2)}.row input{margin-top:4px;accent-color:var(--ac);width:17px;height:17px;flex:none}
+.row.d span{text-decoration:line-through;color:var(--mu)}.tm{font-size:12px;color:var(--mu);min-width:92px;flex:none;padding-top:2px}
+.bar{height:8px;background:var(--p2);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.btn{background:var(--ac);color:#10122a;border:0;border-radius:10px;padding:9px 16px;font:600 14px Inter;cursor:pointer}
+.btn.g{background:var(--p2);color:var(--tx)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.cal .h{font-size:12px;color:var(--mu);text-align:center}
+.cell{border:1px solid var(--bd);border-radius:9px;padding:5px;min-height:62px;font-size:11px;cursor:pointer;background:var(--p);text-align:left;color:var(--tx);position:relative;overflow:hidden}
+.cell b{font-size:13px}.cell .s{position:absolute;left:0;top:0;bottom:0;width:4px}.cell.sel{outline:2px solid var(--ac)}.cell.ok{background:var(--p2)}.cell.ok::after{content:"✓";position:absolute;right:5px;top:3px;color:var(--ok);font-weight:700}
+.cell .t{display:block;color:var(--mu);line-height:1.2;margin-top:2px}@media(max-width:600px){.cell .t{display:none}}
+details{border-bottom:1px solid var(--bd);padding:8px 0}summary{cursor:pointer;font-weight:600}
+li{margin:3px 0 3px 18px}pre{background:var(--p2);padding:12px;border-radius:10px;overflow:auto;font-size:13px;margin:8px 0}
+input[type=text],input[type=search]{background:var(--p2);border:1px solid var(--bd);color:var(--tx);border-radius:9px;padding:9px 12px;font:15px Inter;width:100%}
+.dock{position:fixed;bottom:0;left:0;right:0;background:var(--p);border-top:1px solid var(--bd);padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:6}
+.dock .big{font:700 24px Sora;min-width:76px;text-align:center}
+.ring{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font:700 14px Sora;flex:none}
+.ring span{background:var(--p);width:50px;height:50px;border-radius:50%;display:grid;place-items:center}
+.pr{display:grid;grid-template-columns:130px 1fr 44px;gap:10px;align-items:center;margin:7px 0;font-size:13px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header><div class="top"><div><h1 style="font-size:19px">GATE 2027 · CS &amp; IT planner</h1><div class="mu" style="font-size:12px" id="sub"></div></div><div class="chips" id="chips"></div></div>
+<nav id="nav"></nav></header>
+<main id="v"></main>
+<div class="dock"><div class="big" id="clk">25:00</div>
+<button class="btn" id="st">Start focus (25 min)</button><button class="btn g" id="two">Can't start? Do just 5 minutes</button>
+<span class="mu" style="font-size:13px" id="fm"></span></div>
+<script>
+const SUB={DM:["Discrete Maths","#a78bfa",1],EM:["Linear Algebra, Calculus, Probability","#f9a8d4",1],DL:["Digital Logic","#fcd34d",2],CO:["Computer Organization","#fb923c",3],PD:["Programming & Data Structures","#4ade80",4],AL:["Algorithms","#2dd4bf",5],TC:["Theory of Computation","#60a5fa",6],CD:["Compiler Design","#c4b5fd",7],OS:["Operating System","#f87171",8],DB:["Databases","#a3e635",9],CN:["Computer Networks","#38bdf8",10],RV:["Revision / PYQs","#e2e8f0",0],MK:["Mock tests","#fda4af",0]};
+const SEC=["","Engineering Mathematics","Digital Logic","Computer Organization & Architecture","Programming & Data Structures","Algorithms","Theory of Computation","Compiler Design","Operating System","Databases","Computer Networks"];
+// [subject, title, topics separated by ';' (Topic: subtopics), PYQ focus]
+const D=[
+["DM","Propositional & First-Order Logic","Propositional logic: connectives, truth tables, equivalences, implication/contrapositive, CNF/DNF, tautology/contradiction/satisfiability, functional completeness, inference rules; First-order logic: predicates, quantifiers, nested quantifiers, English→FOL translation, free/bound variables, validity","FOL sentence selection, counting satisfying assignments, equivalence MCQs"],
+["DM","Sets, Relations, Functions","Sets: operations, power set, cardinality, inclusion–exclusion; Relations: reflexive, symmetric, antisymmetric, transitive, equivalence classes, closures, counting relations; Functions: injective/surjective/bijective, composition, inverse, counting functions","Number of relations with a property, function counting"],
+["DM","Partial Orders, Lattices, Monoids, Groups","Partial orders: Hasse diagram, chains/antichains, maximal/minimal, topological order; Lattices: lub/glb, bounded, complemented, distributive; Algebraic structures: semigroup, monoid, group, subgroup, cyclic, abelian, order of element, Lagrange's theorem","Lattice identification, group properties, Hasse counting"],
+["DM","Graph Theory","Basics: degree sequence, handshaking, isomorphism, special graphs; Connectivity: paths, cut vertex/bridge, Euler & Hamiltonian; Matching: bipartite, Hall's theorem, perfect matching; Colouring: chromatic number, planar graphs, Euler's formula; Trees: spanning trees, counting","Chromatic number, max/min edges, matchings, degree sequences (NAT)"],
+["DM","Combinatorics","Counting: sum/product rule, permutations, combinations, pigeonhole, derangements, stars & bars; Recurrence relations: forming, characteristic equation, homogeneous/non-homogeneous; Generating functions: ordinary GF, coefficient extraction, binomial series, Catalan numbers","Recurrence solving, counting strings/functions (NAT)"],
+["EM","Linear Algebra","Matrices: types, rank, inverse, trace; Determinants: properties, cofactors; System of linear equations: consistency, unique/infinite/no solution, Gauss elimination; Eigenvalues & eigenvectors: characteristic polynomial, Cayley–Hamilton, trace/det relations; LU decomposition: Doolittle method","Eigenvalues (NAT), rank, system consistency"],
+["EM","Calculus","Limits: L'Hôpital, standard limits, squeeze; Continuity & differentiability: piecewise functions; Maxima & minima: first/second derivative tests; Mean value theorem: Rolle, Lagrange; Integration: definite/improper, substitution, by parts, standard integrals","Limit values (NAT), max/min, definite integrals"],
+["EM","Probability I: Basics & Bayes","Basics: sample space, axioms, independence; Conditional probability: multiplication rule, total probability; Bayes' theorem: urns, test accuracy; Random variables: PMF/PDF/CDF, expectation, variance, linearity of expectation; Mean, median, mode, standard deviation","Bayes & conditional probability, expected value NAT"],
+["EM","Probability II: Distributions","Uniform: mean/variance; Binomial: PMF, np, npq; Poisson: λ, approximation; Exponential: memoryless, CDF; Normal: standard normal, z-score; Covariance & expectation tricks: coupon collector, balls-and-bins","Binomial/Poisson probabilities, expected values"],
+["DL","Boolean Algebra & Minimisation","Boolean algebra: laws, duality, De Morgan, SOP/POS, minterm/maxterm; Minimisation: algebraic, Karnaugh map (up to 5 variables), don't-cares, essential prime implicants; Tabular method: Quine–McCluskey; Gates: NAND/NOR universality, XOR properties","K-map minimal expression, number of prime implicants"],
+["DL","Combinational & Sequential Circuits","Combinational design: half/full adder, subtractor, MUX as function generator, decoder, encoder, comparator, ROM/PLA; Sequential: SR/JK/D/T flip-flops, excitation tables, characteristic equations; Counters (ripple, synchronous, ring, Johnson), shift registers, state tables, Mealy/Moore; Timing: propagation delay, setup/hold, hazards","Counter sequence, MUX/decoder implementation, FSM"],
+["DL","Number Representation & Arithmetic","Number systems: base conversion, 1's/2's complement, sign-magnitude, ranges; Fixed point: addition, subtraction, overflow detection; Floating point: IEEE 754 single/double, bias, normalised/denormal, special values, precision/range; Arithmetic circuits: carry-lookahead, Booth's multiplication","IEEE 754 conversion (NAT), overflow, 2's complement range"],
+["CO","Instruction Set & Addressing Modes","ISA: formats, opcode/operand bit counts, RISC vs CISC; Addressing modes: immediate, direct, indirect, register, register-indirect, displacement/base/index, relative, auto-inc/dec; Effective address calculation; Subroutine call/return & stack; Instruction cycle: fetch-decode-execute","Effective address, instruction encoding bits"],
+["CO","ALU & Control Unit","ALU design: adder/subtractor, flags, bus organisation, datapath; Control unit: hardwired vs microprogrammed; Microprogramming: microinstruction formats, horizontal vs vertical, control memory size; Registers, micro-operations, timing","Control-word size, datapath cycles"],
+["CO","Memory Hierarchy & Cache","Hierarchy: locality, access time, AMAT; Cache mapping: direct, fully associative, set-associative with tag/index/offset bits; Replacement: LRU, FIFO; Write policies: write-through/back, allocate; Multi-level cache, hit ratio, miss types; Memory interfacing: address decoding, chip count, DRAM/SRAM, interleaving; Disk access time","Cache bits (NAT), hit/miss tracing, effective access time"],
+["CO","I/O, Interrupts, DMA & Pipelining","I/O interface: programmed, interrupt-driven, DMA (cycle-stealing/burst); Interrupts: vectored, priority, masking, daisy chain; Pipelining: speedup, CPI, stalls; Hazards: structural, data (RAW/WAR/WAW), control; forwarding, branch prediction; Execution time with hazards","Pipeline cycles with stalls (NAT), DMA % cycles stolen"],
+["PD","C Programming I","Basics: data types, operators, precedence, bitwise ops, type conversion; Control flow: loops, switch, ternary; Functions: call by value, scope, static/auto/extern; Pointers: arithmetic, pointer-to-pointer, function pointers, const; Output prediction: printf/scanf behaviour, undefined behaviour traps","Output of C snippets (very frequent), pointer puzzles"],
+["PD","C Programming II & Recursion","Arrays: 1D/2D, row/column-major, array–pointer duality; Strings: library functions, null terminator; Structures, unions, enums, sizeof/padding; Dynamic memory: malloc/free; Recursion: call stack, activation records, tracing, tail recursion, return values","Recursion tracing (NAT), array address calc"],
+["PD","Stacks, Queues, Linked Lists","Stack: push/pop, expression evaluation, infix→postfix, parenthesis matching; Queue: circular queue, deque, priority queue, queue via two stacks; Linked list: singly/doubly/circular, reversal, deletion, cycle detection, code tracing","Stack permutations, linked-list code output"],
+["PD","Trees, BST & Heaps","Binary trees: traversals, build from traversals, node/height relations, counting trees; BST: search/insert/delete, inorder sorted; AVL: rotations; Heaps: array indices, heapify, build-heap O(n), insert/delete, heap sort, k-th largest","Traversal construction, BST insertion height, heap ops"],
+["PD","Graphs & Hashing in DS","Graph representation: adjacency matrix vs list, space/time; BFS/DFS implementation; Hashing: hash functions, chaining, open addressing (linear, quadratic, double), load factor, collisions; Choosing a data structure by operation cost","Hash table final state, collisions count"],
+["AL","Complexity & Recurrences","Asymptotic notation: O, Ω, Θ, o, ω, growth-rate ordering; Analysis: best/worst/average, nested loops; Recurrences: substitution, recursion tree, Master theorem, non-master cases; Space complexity","Growth ordering, loop complexity, recurrence solving"],
+["AL","Searching & Sorting","Searching: linear, binary and variants; Sorting: bubble, selection, insertion, merge, quick (partition), heap, counting/radix/bucket; Properties: stability, in-place, lower bound Ω(n log n); Comparisons/swaps counts, quicksort worst case, quickselect","Comparison counts, quicksort partition, time complexity"],
+["AL","Greedy Techniques","Greedy method: exchange argument, correctness; Classics: activity selection, fractional knapsack, Huffman coding, job sequencing with deadlines; Optimal merge pattern; Scheduling problems; Greedy vs DP decisions","Huffman cost (NAT), job sequencing profit"],
+["AL","Dynamic Programming","DP method: optimal substructure, overlapping subproblems, memoisation vs tabulation; Classics: 0/1 knapsack, LCS, LIS, matrix-chain, edit distance, coin change; Graph DP: Floyd–Warshall; Table filling and counting subproblems","DP table values (NAT), recurrence identification"],
+["AL","Divide & Conquer + Hashing","Divide & conquer: merge sort, quicksort, binary search, Strassen, closest pair, max-subarray, inversions; Complexity via Master theorem; Hashing in algorithms: universal hashing, probe sequences, expected chain length; Identify algorithm from code","Inversions, Strassen-like recurrences"],
+["AL","Graph Algorithms","Traversals: BFS, DFS, edge classification, timestamps, topological sort, SCC, articulation points; Minimum spanning trees: Kruskal, Prim, cut/cycle property, union-find; Shortest paths: Dijkstra (negative edges), Bellman–Ford, Floyd–Warshall, DAG shortest path; Complexity with different structures","MST weight (NAT), Dijkstra order, DFS timestamps"],
+["TC","Regular Languages & Finite Automata","Regular expressions: identities, simplification; Finite automata: DFA, NFA, ε-NFA, conversions, minimisation, state counting; Regular languages: closure properties, Myhill–Nerode; Designing DFAs: divisibility, substring, counting constraints","Minimal DFA states (NAT), regex equivalence"],
+["TC","Context-Free Grammars & Pushdown Automata","CFG: derivations, parse trees, ambiguity, simplification, CNF/GNF; PDA: DPDA vs NPDA, acceptance by final state/empty stack, design; CFL: closure properties, CFG↔PDA; Identify the language of a grammar/automaton","Language of grammar, DCFL vs CFL, ambiguity"],
+["TC","Pumping Lemma, Turing Machines, Undecidability","Pumping lemma: regular and CFL; Language hierarchy: regular ⊂ DCFL ⊂ CFL ⊂ CSL ⊂ REL; Turing machines: design, variants, recursive vs RE; Undecidability: halting problem, reductions, Rice's theorem, decidable/undecidable tables","Decidability statements (very frequent), non-regular proofs"],
+["CD","Lexical Analysis & Top-Down Parsing","Compiler phases; Lexical analysis: tokens/lexemes, regex→DFA, longest match, symbol table; Parsing basics: left recursion removal, left factoring; Top-down: recursive descent, FIRST & FOLLOW, LL(1) table construction and conditions","FIRST/FOLLOW sets, LL(1) check, token counting"],
+["CD","Bottom-Up Parsing (LR)","Shift-reduce parsing: handles, S/R and R/R conflicts; LR(0) items: closure, goto, canonical collection; SLR(1), LALR(1), CLR(1): tables and membership questions; Operator precedence basics; Count states and conflicts, parser power hierarchy","Number of LR(0) states, conflict identification"],
+["CD","SDT, Runtime & Intermediate Code","Syntax-directed translation: synthesised/inherited attributes, S- and L-attributed, annotated parse trees; Runtime environments: activation records, stack/heap, static vs dynamic scope, parameter passing; Intermediate code: three-address code, quadruples/triples, DAG, basic blocks, CFG","SDT evaluation output, number of 3AC instructions, parameter passing outputs"],
+["CD","Optimisation & Data-Flow Analysis","Local optimisation: constant folding, strength reduction, DAG-based CSE, dead code; Data-flow analysis: constant propagation, liveness analysis, reaching definitions, available expressions; Common sub-expression elimination (global), gen/kill, in/out sets; Register allocation basics","Liveness sets, minimum registers, constant propagation"],
+["OS","Processes, Threads & System Calls","OS basics: kernel/user mode, system calls, interrupts; Processes: PCB, states, context switch, fork(), exec, zombie/orphan; Threads: user vs kernel, multithreading models; Process tracing: count processes from fork programs","fork() counting (frequent), thread vs process"],
+["OS","IPC, Concurrency & Synchronisation","IPC: pipes, message passing, shared memory; Critical section: requirements, Peterson, Dekker, test-and-set; Semaphores: binary/counting, producer–consumer, readers–writers, dining philosophers; Monitors, race conditions, mutex vs semaphore","Semaphore programs (min/max values), mutual-exclusion correctness"],
+["OS","Deadlock & CPU / I/O Scheduling","Deadlock: 4 conditions, RAG, prevention, avoidance (Banker's), detection, recovery; Safe state, minimum resources for deadlock-freedom; CPU scheduling: FCFS, SJF, SRTF, priority, RR, multilevel feedback; metrics: waiting, turnaround, response; Disk scheduling: FCFS, SSTF, SCAN, C-SCAN, LOOK","Gantt chart averages (NAT), Banker's safe sequence, head movement"],
+["OS","Memory Management & Virtual Memory","Contiguous allocation: fragmentation, first/best/worst fit; Paging: page table, address translation, multi-level, TLB & effective access time; Segmentation; Virtual memory: demand paging, page faults, FIFO/LRU/Optimal, Belady's anomaly, thrashing, working set","Page faults count, page-table size, EAT with TLB"],
+["OS","File Systems & Storage","File concepts: attributes, operations, access methods; Directory structures; Allocation: contiguous, linked, FAT, indexed, inode with direct/indirect blocks (max file size); Free-space management: bitmap/list; Disk: seek/rotational/transfer time, RAID basics","Inode max file size (NAT), disk access time"],
+["DB","ER Model & Relational Model","ER model: entities, weak entities, attributes, relationships, cardinality, participation, generalisation, ER→tables; Relational model: super/candidate/primary/foreign keys; Relational algebra: select, project, joins, division, set operations; Tuple calculus: TRC, safe expressions","Min tables from ER, algebra expression meaning, division"],
+["DB","SQL","DDL/DML: CREATE, ALTER, INSERT, UPDATE, DELETE; Queries: WHERE, GROUP BY, HAVING, aggregates, ORDER BY; Joins: inner, outer, natural, self, cross; Subqueries: IN, EXISTS, ANY/ALL, correlated; NULL handling, views, set operations","Query output rows (NAT), correlated subqueries, NULL traps"],
+["DB","Integrity Constraints & Normal Forms","Integrity constraints: domain, key, entity, referential (ON DELETE), triggers; Functional dependencies: closure, canonical cover, candidate keys, Armstrong axioms; Normal forms: 1NF, 2NF, 3NF, BCNF; Decomposition: lossless join, dependency-preserving","Number of candidate keys, highest normal form, lossless check"],
+["DB","File Organisation & Indexing","File organisation: heap, sorted, hashed; blocking factor, block accesses; Indexing: primary, clustering, secondary, dense/sparse, multilevel; B and B+ trees: order, max/min keys, insertion/deletion, height, node-size derivation; Hashing: static & extendible","B+ tree order/keys (NAT), block access count"],
+["DB","Transactions & Concurrency Control","Transactions: ACID, states, schedules (serial, recoverable, cascadeless, strict); Serializability: conflict (precedence graph), view; Concurrency control: 2PL (strict, rigorous), timestamp ordering, deadlocks in locking; Recovery: log, undo/redo, checkpoints, WAL","Conflict-serializable schedules, 2PL validity, count schedules"],
+["CN","Layering, Switching & Data Link I","Layering: OSI vs TCP/IP, PDUs, encapsulation; Switching: circuit, packet, virtual circuit; Performance metrics: bandwidth, throughput, delays, bandwidth-delay product; Data link: framing, error detection (parity, checksum, CRC, Hamming); Flow control: stop-and-wait, Go-Back-N, Selective Repeat, efficiency","CRC remainder, window size/efficiency (NAT), delay calc"],
+["CN","MAC, Ethernet & Routing","Medium access: ALOHA (pure/slotted), CSMA, CSMA/CD, minimum frame size, backoff; Ethernet: frame format, switches, learning bridge, VLAN; Routing: distance vector (count-to-infinity, split horizon), link state (Dijkstra/OSPF); Routing-table updates","Min frame size, DV table after updates"],
+["CN","IPv4, CIDR, Fragmentation & NAT","IPv4: header fields, classful addressing, subnetting, masks; CIDR notation: aggregation, longest-prefix match, usable hosts; Fragmentation: MTU, offset, MF flag, sizes; NAT: translation table, port mapping; ICMP/ARP/DHCP overview","Subnet/host counts (NAT), fragmentation offsets"],
+["CN","Transport & Application Layer","TCP: header, 3-way handshake, teardown, sequence/ack numbers; Flow control: sliding window; Congestion control: slow start, AIMD, fast retransmit/recovery, ssthresh/cwnd; Socket API: socket, bind, listen, accept, connect, TCP vs UDP; DNS: hierarchy, iterative/recursive; HTTP: methods, status codes, persistent connections, RTT calc","cwnd after n RTT (NAT), HTTP timing, DNS resolution"]];
+const J=[
+["RV","Discrete Maths PYQs","Last 10 years PYQs: logic, sets/relations, lattices/groups, graph theory, combinatorics; Re-derive formulas in your Obsidian cheat-sheet"],
+["RV","Linear Algebra, Calculus, Probability PYQs","Eigenvalues, rank; limits & integrals; Bayes, distributions, expectation; 15 NAT problems"],
+["RV","Digital Logic PYQs","K-map, flip-flops/counters, IEEE 754, MUX/decoder implementations"],
+["RV","Computer Organization PYQs","Cache numericals, pipelining hazards, addressing modes, DMA, microprogramming"],
+["RV","C Programming & Data Structures PYQs","Output tracing, pointers, recursion, trees/heaps/hashing, stack/queue puzzles"],
+["RV","Algorithms PYQs I","Complexity, recurrences, sorting, searching, greedy"],
+["RV","Algorithms PYQs II","DP, divide & conquer, graph algorithms, MST & shortest paths"],
+["RV","Theory of Computation PYQs","DFA/NFA, CFG/PDA, pumping lemma, decidability tables"],
+["RV","Compiler Design PYQs","FIRST/FOLLOW, LR items, SDT, 3AC, liveness"],
+["RV","Operating System PYQs I","Processes, fork, synchronisation, deadlock, scheduling"],
+["RV","Operating System PYQs II","Paging, virtual memory, TLB, file systems, disk scheduling"],
+["RV","Databases PYQs","SQL, normalisation, indexing, transactions, ER/algebra"],
+["RV","Computer Networks PYQs","CRC, sliding window, MAC, subnetting, TCP congestion, DNS/HTTP"],
+["MK","Full Mock Test 1 (3 hrs)","Attempt in real exam conditions, 65 questions, virtual calculator only; Afterwards: mark every wrong/guessed question"],
+["RV","Mock 1 analysis + weak topics","Analyse every error (concept / silly / time); Re-learn 3 weakest topics; Rewrite notes in Obsidian"],
+["MK","Full Mock Test 2 (3 hrs)","Strict timing; Attempt NATs first pass; Afterwards: error analysis"],
+["RV","Mock 2 analysis + weak topics","Error analysis; Re-solve all wrong questions without looking; 20 PYQs from weak subjects"],
+["MK","Full Mock Test 3 (3 hrs)","Strict timing, test your question-selection strategy"],
+["RV","Rapid revision A: Maths, DL, COA","Only your own Obsidian cheat-sheets; formulas, tables, shortcuts; 25 mixed NATs"],
+["RV","Rapid revision B: Core CS","Algorithms, DS, TOC, Compiler: key tables, recurrences, closure tables; 25 mixed questions"],
+["MK","Full Mock Test 4 (3 hrs)","Strict timing; practise skipping time-sink questions"],
+["RV","Mock 4 analysis + weak topics","Error analysis; revise OS, DBMS, CN formula/tables"],
+["MK","Full Mock Test 5 (3 hrs)","Final dress rehearsal: same time slot as GATE session"],
+["RV","Weakness sweep","Revisit mistake log fully; Solve 30 PYQs from your 3 weakest subjects"],
+["RV","Formula sheets & NAT speed","Read all cheat-sheets once; 30 timed NAT questions; Practice virtual calculator"],
+["RV","Light revision & rest","Skim Mistake Log; early night; walk and relax; Confirm admit card, exam centre, ID proof"]];
+const B=[["05:00","Wake up: water, sunlight, phone stays away",0],["05:15","Walk / stretch outside (30 min)",0],["05:45","Meditation 10 min + read today's topic list",0],["06:00","Block 1: Learn new topics, first half (2 h)",2],["08:00","Breakfast & freshen up",0],["08:30","Block 2: Learn second half + Obsidian notes (2 h)",2],["10:30","Break: no screen (15 min)",0],["10:45","Block 3: Solve PYQs of today's topics (1.5 h)",1.5],["12:15","Lunch + 20 min nap",0],["14:00","Block 4: NAT + hard problems (1.5 h)",1.5],["15:30","Free time, exercise or walk",0],["17:00","Block 5: Spaced revision of previous days (1 h)",1],["18:00","Evening rest, dinner at 19:30",0],["20:15","Block 6: Recall: close the book and write a summary + Mistake Log (45 min)",.75],["21:00","Reading (non-study, 30 min) & plan tomorrow",0],["22:00","Lights out (7 h sleep)",0]];
+const Q=["Future you is watching. Make them proud tonight.","You don't need motivation. You need the first 5 minutes.","Every PYQ solved is a mark you won't lose in February.","Discipline is choosing what you want most over what you want now.","One focused day beats ten 'almost' days.","Boring and consistent beats brilliant and occasional.","Tired? Walk 10 minutes, then do one block. Don't negotiate."];
+const $=s=>document.querySelector(s),iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const P=[];let li=0,ji=0;
+for(let d=new Date(2026,10,6);d<=new Date(2027,0,31);d.setDate(d.getDate()+1)){const c=new Date(d);let x;
+if(c.getDay()==0)x=[c.getMonth()==0?"MK":"RV",c.getMonth()==0&&c.getDate()==31?"Final calm day + light mock review":"Weekly test & catch-up","Timed weekly test: 30 questions from this week's topics; Fix each mistake → Mistake Log; Finish any pending topics; Redo 20 weak PYQs; 10 NAT questions; Plan next week","Your own mistakes"];
+else x=c<new Date(2027,0,1)?D[li++]:J[ji++];
+P.push({d:c,k:iso(c),s:x[0],t:x[1],tp:x[2].split(";").map(s=>s.trim()),q:x[3]||"Last 10 years PYQs on these topics + NAT drill",n:P.length+1});}
+let S={c:{},f:0,nat:[0,0]};try{S=Object.assign(S,JSON.parse(localStorage.getItem("g27")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("g27",JSON.stringify(S))}catch(e){}};
+const dp=p=>{let n=0,t=p.tp.length+B.length;for(const k in S.c)if(k.startsWith(p.k+"|"))n++;return n/t};
+const t0=iso(new Date());let sel=(P.find(p=>p.k==t0)||(t0<P[0].k?P[0]:P[P.length-1])).k,tab="today",ft="";
+const NAV=[["today","Today"],["plan","Plan & progress"],["syl","Syllabus map"],["notes","Obsidian notes"],["nat","NAT practice"]];
+const fd=d=>d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+function streak(){let s=0,i=P.findIndex(p=>p.k==t0);if(i<0)i=t0>P[0].k?P.length-1:-1;if(i>=0&&dp(P[i])<.6)i--;for(;i>=0&&dp(P[i])>=.6;i--)s++;return s}
+function head(){const xp=Object.keys(S.c).length*10+S.f,i=P.findIndex(p=>p.k==t0),left=Math.max(0,Math.ceil((new Date(2027,0,31)-new Date())/864e5));
+$("#chips").innerHTML=`<span class="chip">🔥 ${streak()}-day streak</span><span class="chip">Level ${Math.floor(xp/500)+1} · ${xp} XP</span><span class="chip">${left} days to Jan 31</span>`;
+$("#sub").textContent="Plan: 6 Nov 2026 → 31 Jan 2027 · Learn till 31 Dec, PYQs & mocks in Jan · check official GATE dates";
+$("#nav").innerHTML=NAV.map(([k,l])=>`<button class="${k==tab?"on":""}" onclick="go('${k}')">${l}</button>`).join("");
+$("#fm").textContent=Math.round(S.f/60*10)/10+" focus hrs logged"}
+const go=t=>{tab=t;render();scrollTo(0,0)};
+const tg=(k)=>{S.c[k]?delete S.c[k]:S.c[k]=1;save();render()};
+function today(){const p=P.find(x=>x.k==sel),i=p.n-1,pc=Math.round(dp(p)*100),m=SUB[p.s];
+const hrs=B.reduce((a,b,j)=>a+(S.c[p.k+"|b"+j]?b[2]:0),0);
+return `<div class="grid2"><div><div class="card"><div style="display:flex;gap:14px;align-items:center"><div class="ring" style="background:conic-gradient(var(--ok) ${pc*3.6}deg,var(--p2) 0)"><span>${pc}%</span></div><div style="flex:1"><div class="mu">Day ${p.n} of ${P.length} · ${fd(p.d)}</div><h2 style="font-size:20px">${p.t}</h2><span class="tag" style="background:${m[1]}">${m[0]}</span></div></div>
+<div style="display:flex;gap:8px;margin-top:12px"><button class="btn g" ${i?"":"disabled"} onclick="sel=P[${i-1}]?.k;render()">← Previous</button><button class="btn g" onclick="sel='${t0>=P[0].k&&t0<=P[P.length-1].k?t0:P[0].k}';render()">Jump to today</button><button class="btn g" ${i<P.length-1?"":"disabled"} onclick="sel=P[${i+1}]?.k;render()">Next →</button></div></div>
+<div class="card"><h3>What to study today</h3><p class="mu" style="font-size:13px;margin-bottom:6px">Tick each topic when you can explain it without notes.</p>${p.tp.map((t,j)=>{const k=p.k+"|t"+j,[a,b]=t.split(/:(.*)/s);return `<label class="row ${S.c[k]?"d":""}"><input type="checkbox" ${S.c[k]?"checked":""} onchange="tg('${k}')"><span>${b?`<b>${a}:</b>${b}`:t}</span></label>`}).join("")}</div>
+<div class="card"><h3>Most-asked in GATE</h3><p>${p.q}</p></div></div>
+<div><div class="card"><h3>Daily timetable <span class="mu" style="font-size:13px">· ${hrs}h of 8.75h study done</span></h3>${B.map((b,j)=>{const k=p.k+"|b"+j;return `<label class="row ${S.c[k]?"d":""}"><input type="checkbox" ${S.c[k]?"checked":""} onchange="tg('${k}')"><span class="tm">${b[0]}</span><span>${b[1]}</span></label>`}).join("")}</div>
+<div class="card"><i class="mu">“${Q[i%Q.length]}”</i></div></div></div>`}
+function plan(){const f=P[0].d.getDay()||7,subs=Object.keys(SUB).filter(k=>k!="RV"&&k!="MK");
+const pr=subs.map(k=>{const l=P.filter(p=>p.s==k);return l.length?`<div class="pr"><span>${SUB[k][0].split(",")[0]}</span><div class="bar"><i style="width:${Math.round(l.reduce((a,p)=>a+dp(p),0)/l.length*100)}%;background:${SUB[k][1]}"></i></div><span>${Math.round(l.reduce((a,p)=>a+dp(p),0)/l.length*100)}%</span></div>`:""}).join("");
+let cal=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="h">${d}</div>`).join("")+"<div></div>".repeat(f-1),mo="";
+P.forEach(p=>{if(p.d.getDate()==1||p.n==1){if(cal)cal+=`<div style="grid-column:1/-1;font:700 15px Sora;margin-top:10px">${p.d.toLocaleDateString("en-IN",{month:"long",year:"numeric"})}</div>`;if(p.d.getDate()==1&&p.n>1){cal+="<div></div>".repeat((p.d.getDay()||7)-1)}}
+cal+=`<button class="cell ${dp(p)>=.6?"ok":""} ${p.k==sel?"sel":""}" onclick="sel='${p.k}';go('today')"><i class="s" style="background:${SUB[p.s][1]}"></i><b>${p.d.getDate()}</b><span class="t">${p.t}</span></button>`});
+return `<div class="card"><h2>Phases</h2><ul><li><b>6 Nov → 31 Dec:</b> learn every syllabus topic once (48 study days, Sundays = weekly test).</li><li><b>1 Jan → 15 Jan:</b> subject-wise PYQs + revision from your notes.</li><li><b>16 Jan → 31 Jan:</b> 5 full mocks, error analysis, rapid revision, rest before the exam.</li></ul></div>
+<div class="card"><h3>Subject progress</h3>${pr}</div><div class="card"><h3>Calendar: tap a day to open it</h3><div class="cal">${cal}</div></div>`}
+function syl(){const q=(ft||"").toLowerCase();let h=`<div class="card"><h2>Syllabus map</h2><p class="mu">Every syllabus section → topics → subtopics, with the day to study it. Use this instead of the PDF.</p><input type="search" placeholder="Search a topic (e.g. LR parsing, Bayes, TCP)…" value="${ft}" oninput="ft=this.value;render();document.querySelector('input[type=search]').focus()"></div>`;
+for(let s=1;s<=10;s++){const ds=P.filter(p=>SUB[p.s][2]==s&&p.s!="RV"&&p.s!="MK");const b=ds.map(p=>{if(q&&!(p.t+p.tp.join()).toLowerCase().includes(q))return"";return `<div style="margin:8px 0"><a href="#" onclick="sel='${p.k}';go('today');return false" style="color:var(--ac)"><b>${fd(p.d)}: ${p.t}</b></a><ul>${p.tp.map(t=>`<li>${t.replace(/^([^:]+):/,"<b>$1:</b>")}</li>`).join("")}</ul></div>`}).join("");if(b)h+=`<details ${q?"open":""}><summary>Section ${s}: ${SEC[s]} <span class="mu">(${ds.length} days)</span></summary>${b}</details>`}
+return h}
+function notes(){return `<div class="card"><h2>How to make fast, useful notes in Obsidian</h2><p class="mu">Goal: notes you can revise in 10 minutes, not a textbook copy.</p></div>
+<div class="grid2"><div class="card"><h3>Vault structure</h3><pre>GATE2027/
+ ├─ 00-Inbox/        quick captures
+ ├─ 01-Subjects/
+ │   ├─ Algorithms/   (one note per topic)
+ │   ├─ OS/ DBMS/ CN/ …
+ ├─ 02-Cheatsheets/  1 page per subject
+ ├─ 03-PYQ-Log/      tricky questions
+ ├─ 04-Mistake-Log/  wrong answers + why
+ └─ Templates/</pre><h3>Topic template</h3><pre># {{title}}
+#gate/{{subject}}
+**One-line idea:**
+**Key formulas / rules:**
+**Standard question types:**
+**Trap / common mistake:**
+**Example (solved):**
+Links: [[Related topic]]</pre></div>
+<div class="card"><h3>The 4-step speed method</h3><ol><li><b>Learn:</b> watch or read first, taking no notes.</li><li><b>Write from memory:</b> close the source, write only what you remember (≈10 lines per topic).</li><li><b>Fill gaps:</b> check the source, add what you missed in <code>==highlight==</code>.</li><li><b>Test:</b> turn 3 key points into flashcards: <code>question::answer</code>.</li></ol>
+<h3>Rules to stay fast</h3><ul><li>Max 1 page per topic. Use tables and bullet points.</li><li>Link notes with <code>[[ ]]</code>: e.g. [[Master theorem]] ↔ [[Merge sort]].</li><li>Use tags: <code>#gate/algo</code>, <code>#weak</code>, <code>#formula</code>.</li><li>Callouts: <code>&gt; [!warning] trap</code> for exam traps.</li><li>Handwrite diagrams (Excalidraw plugin) for automata, trees, pipelines.</li><li>Every Sunday: merge the week's notes into the subject cheat-sheet.</li></ul>
+<h3>Useful plugins</h3><ul><li>Spaced Repetition: flashcards from your notes</li><li>Templater: auto-insert topic template</li><li>Dataview: list all <code>#weak</code> notes</li><li>Excalidraw: quick diagrams</li></ul></div></div>
+<div class="card"><h3>Mistake Log format (most valuable note)</h3><pre>| Question | My answer | Correct | Reason (concept/silly/time) | Fix |</pre><p>Revisit the log every Sunday and again in January. Repeated mistakes are your fastest marks.</p></div>`}
+const G=[()=>{let a=24+~~(Math.random()*60),b=12+~~(Math.random()*40),g=(x,y)=>y?g(y,x%y):x;return[`GCD of ${a} and ${b}?`,g(a,b)]},()=>{let n=5+~~(Math.random()*9);return[`Number of edges in a complete graph with ${n} vertices?`,n*(n-1)/2]},()=>{let h=3+~~(Math.random()*6);return[`Maximum nodes in a binary tree of height ${h} (root at height 0)?`,2**(h+1)-1]},()=>{let k=4+~~(Math.random()*3),n=20+~~(Math.random()*30);return[`A ${k}-stage pipeline executes ${n} instructions with no stalls. Total cycles?`,k+n-1]},()=>{let kb=2**(2+~~(Math.random()*5)),bl=2**(3+~~(Math.random()*3));return[`Direct-mapped cache of ${kb} KB with ${bl}-byte blocks. How many cache lines?`,kb*1024/bl]},()=>{let n=6+~~(Math.random()*5),k=2+~~(Math.random()*2);let c=1;for(let i=0;i<k;i++)c=c*(n-i)/(i+1);return[`Number of ways to choose ${k} items from ${n}?`,c]},()=>{let n=100+~~(Math.random()*900);return[`How many 1s are in the binary representation of ${n}?`,n.toString(2).split("1").length-1]},()=>{let p=[0.1,0.2,0.25,0.4][~~(Math.random()*4)],n=[10,20,50][~~(Math.random()*3)];return[`Binomial distribution: n=${n}, p=${p}. Mean?`,n*p]}];
+let cq=G[0]();
+function nat(){const[a,b]=S.nat;return `<div class="grid2"><div class="card"><h2>NAT drill</h2><p class="mu">Type the number only, no options to guess from. Score: ${a}/${b}</p><h3 id="nq" style="margin:14px 0">${cq[0]}</h3><div style="display:flex;gap:8px"><input type="text" id="na" inputmode="decimal" placeholder="Your numerical answer" onkeydown="if(event.key=='Enter')chk()"><button class="btn" onclick="chk()">Check</button></div><p id="nr" style="margin-top:10px"></p></div>
+<div class="card"><h3>How to ace NAT questions</h3><ul><li>No options and no negative marking: always answer.</li><li>Use the virtual calculator; practise it daily.</li><li>Round only at the end; answers have a tolerance range.</li><li>Verify with a small case (n = 2 or 3).</li><li>High-yield NAT areas: probability/expectation, graph counts, cache and pipeline numericals, scheduling averages, page tables, subnetting, DP tables, CRC.</li><li>Do 10 NATs after every study day.</li></ul></div></div>`}
+function chk(){const v=parseFloat($("#na").value);if(isNaN(v)){$("#nr").textContent="Enter a number first.";return}
+const ok=Math.abs(v-cq[1])<.01;S.nat[1]++;if(ok)S.nat[0]++;save();$("#nr").innerHTML=ok?"✅ Correct!":`❌ Answer was <b>${cq[1]}</b>`;cq=G[~~(Math.random()*G.length)]();setTimeout(()=>{if(tab=="nat")render()},1400);head()}
+let t=null,left=1500,run=false;const fmt=s=>String(~~(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+function tick(){left--;$("#clk").textContent=fmt(left);if(left%60==0){S.f++;save();$("#fm").textContent=Math.round(S.f/60*10)/10+" focus hrs logged"}if(left<=0){clearInterval(t);run=false;$("#st").textContent="Start focus (25 min)";left=1500;$("#clk").textContent="25:00";head();alert("Focus block done! Take a 5-minute break, then tick it off.")}}
+function stt(m){if(run){clearInterval(t);run=false;$("#st").textContent="Start focus (25 min)";return}left=m*60;run=true;$("#st").textContent="Stop";t=setInterval(tick,1000)}
+$("#st").onclick=()=>stt(25);$("#two").onclick=()=>{if(run)stt();left=300;run=true;$("#st").textContent="Stop";clearInterval(t);t=setInterval(tick,1000)};
+function render(){head();$("#v").innerHTML=({today,plan,syl,notes,nat})[tab]()}
+render();
+</script></body></html>
